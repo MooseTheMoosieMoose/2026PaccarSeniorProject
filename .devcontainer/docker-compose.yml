@@ -1,0 +1,20 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: ../Containerfile
+    runtime: nvidia
+    network_mode: host
+    privileged: true
+
+    volumes:
+      - /dev:/dev
+      - ..:/workspace:cached
+      - /run/udev:/run/udev:ro
+
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+    stdin_open: true
+    tty: true

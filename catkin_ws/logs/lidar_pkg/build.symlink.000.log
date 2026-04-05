@@ -1,0 +1,3 @@
+Symlinking /workspace/catkin_ws/devel/share/lidar_pkg/cmake/lidar_pkgConfig.cmake
+Symlinking /workspace/catkin_ws/devel/share/lidar_pkg/cmake/lidar_pkgConfig-version.cmake
+Symlinking /workspace/catkin_ws/devel/lib/pkgconfig/lidar_pkg.pc

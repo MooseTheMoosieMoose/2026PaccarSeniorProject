@@ -1,0 +1,1 @@
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/roseus/ros/coop_per_msgs/msg/ObjectDetection.l

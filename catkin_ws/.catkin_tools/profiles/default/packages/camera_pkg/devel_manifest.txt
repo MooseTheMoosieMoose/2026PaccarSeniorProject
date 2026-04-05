@@ -1,0 +1,4 @@
+camera_pkg
+/workspace/catkin_ws/devel/.private/camera_pkg/share/camera_pkg/cmake/camera_pkgConfig-version.cmake /workspace/catkin_ws/devel/share/camera_pkg/cmake/camera_pkgConfig-version.cmake
+/workspace/catkin_ws/devel/.private/camera_pkg/share/camera_pkg/cmake/camera_pkgConfig.cmake /workspace/catkin_ws/devel/share/camera_pkg/cmake/camera_pkgConfig.cmake
+/workspace/catkin_ws/devel/.private/camera_pkg/lib/pkgconfig/camera_pkg.pc /workspace/catkin_ws/devel/lib/pkgconfig/camera_pkg.pc

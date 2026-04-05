@@ -1,0 +1,37 @@
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+#--------------------------
+#Fetch down the Ouster driver node and build it
+#--------------------------
+RUN mkdir -p /opt/lidar_ws/src
+WORKDIR /opt/lidar_ws/src
+RUN git clone --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git
+WORKDIR /opt/lidar_ws
+RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release"
+WORKDIR /
+
+#--------------------------
+#Now we need to resolve the necessary dependancies for PointPillars
+#--------------------------
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install --ignore-installed \
+        numba \
+        pyyaml \
+        open3d
+
+#--------------------------
+#Bully the system into understanding that we are on a Jetson
+#--------------------------
+ENV TORCH_CUDA_ARCH_LIST="8.7"
+
+#--------------------------
+#Now we can build and install PointPillars
+#--------------------------
+RUN mkdir -p /opt/pointpillars
+WORKDIR /opt/pointpillars
+RUN git clone https://github.com/zhulf0804/PointPillars.git
+WORKDIR /opt/pointpillars/PointPillars
+RUN pip install .
+WORKDIR /

@@ -1,0 +1,8 @@
+prefix=/workspace/catkin_ws/install
+
+Name: coop_per_msgs
+Description: Description of coop_per_msgs
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: 

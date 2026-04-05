@@ -1,0 +1,1 @@
+/workspace/catkin_ws/devel/.private/camera_pkg/share/camera_pkg/cmake/camera_pkgConfig.cmake

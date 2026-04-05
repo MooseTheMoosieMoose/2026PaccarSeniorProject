@@ -1,0 +1,21 @@
+{
+  "name": "Jetson ROS LiDAR Node",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-iot.vscode-ros",
+        "ms-vscode.cpptools"
+      ]
+    }
+  },
+
+  "postCreateCommand": "echo 'source /opt/ros/noetic/setup.bash' >> ~/.bashrc",
+
+  "remoteUser": "root"
+}

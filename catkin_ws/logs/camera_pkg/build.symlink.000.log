@@ -1,0 +1,3 @@
+Symlinking /workspace/catkin_ws/devel/share/camera_pkg/cmake/camera_pkgConfig-version.cmake
+Symlinking /workspace/catkin_ws/devel/share/camera_pkg/cmake/camera_pkgConfig.cmake
+Symlinking /workspace/catkin_ws/devel/lib/pkgconfig/camera_pkg.pc

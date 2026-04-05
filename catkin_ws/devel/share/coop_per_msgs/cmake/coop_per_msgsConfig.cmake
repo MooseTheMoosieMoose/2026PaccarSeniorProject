@@ -1,0 +1,1 @@
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/coop_per_msgs/cmake/coop_per_msgsConfig.cmake

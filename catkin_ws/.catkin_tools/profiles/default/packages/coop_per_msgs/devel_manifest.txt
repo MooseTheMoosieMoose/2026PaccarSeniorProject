@@ -1,0 +1,19 @@
+coop_per_msgs
+/workspace/catkin_ws/devel/.private/coop_per_msgs/include/coop_per_msgs/ObjectDetection.h /workspace/catkin_ws/devel/include/coop_per_msgs/ObjectDetection.h
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/coop_per_msgs/cmake/coop_per_msgsConfig-version.cmake /workspace/catkin_ws/devel/share/coop_per_msgs/cmake/coop_per_msgsConfig-version.cmake
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/coop_per_msgs/cmake/coop_per_msgs-msg-extras.cmake /workspace/catkin_ws/devel/share/coop_per_msgs/cmake/coop_per_msgs-msg-extras.cmake
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/coop_per_msgs/cmake/coop_per_msgsConfig.cmake /workspace/catkin_ws/devel/share/coop_per_msgs/cmake/coop_per_msgsConfig.cmake
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/coop_per_msgs/cmake/coop_per_msgs-msg-paths.cmake /workspace/catkin_ws/devel/share/coop_per_msgs/cmake/coop_per_msgs-msg-paths.cmake
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/gennodejs/ros/coop_per_msgs/_index.js /workspace/catkin_ws/devel/share/gennodejs/ros/coop_per_msgs/_index.js
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/gennodejs/ros/coop_per_msgs/msg/ObjectDetection.js /workspace/catkin_ws/devel/share/gennodejs/ros/coop_per_msgs/msg/ObjectDetection.js
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/gennodejs/ros/coop_per_msgs/msg/_index.js /workspace/catkin_ws/devel/share/gennodejs/ros/coop_per_msgs/msg/_index.js
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/roseus/ros/coop_per_msgs/manifest.l /workspace/catkin_ws/devel/share/roseus/ros/coop_per_msgs/manifest.l
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/roseus/ros/coop_per_msgs/msg/ObjectDetection.l /workspace/catkin_ws/devel/share/roseus/ros/coop_per_msgs/msg/ObjectDetection.l
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/ObjectDetection.lisp /workspace/catkin_ws/devel/share/common-lisp/ros/coop_per_msgs/msg/ObjectDetection.lisp
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/_package.lisp /workspace/catkin_ws/devel/share/common-lisp/ros/coop_per_msgs/msg/_package.lisp
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/_package_ObjectDetection.lisp /workspace/catkin_ws/devel/share/common-lisp/ros/coop_per_msgs/msg/_package_ObjectDetection.lisp
+/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/coop_per_msgs-msg.asd /workspace/catkin_ws/devel/share/common-lisp/ros/coop_per_msgs/msg/coop_per_msgs-msg.asd
+/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/pkgconfig/coop_per_msgs.pc /workspace/catkin_ws/devel/lib/pkgconfig/coop_per_msgs.pc
+/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/python3/dist-packages/coop_per_msgs/__init__.py /workspace/catkin_ws/devel/lib/python3/dist-packages/coop_per_msgs/__init__.py
+/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/python3/dist-packages/coop_per_msgs/msg/_ObjectDetection.py /workspace/catkin_ws/devel/lib/python3/dist-packages/coop_per_msgs/msg/_ObjectDetection.py
+/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/python3/dist-packages/coop_per_msgs/msg/__init__.py /workspace/catkin_ws/devel/lib/python3/dist-packages/coop_per_msgs/msg/__init__.py

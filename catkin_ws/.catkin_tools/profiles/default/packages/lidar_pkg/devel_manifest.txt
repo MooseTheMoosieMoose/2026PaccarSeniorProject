@@ -1,0 +1,4 @@
+lidar_pkg
+/workspace/catkin_ws/devel/.private/lidar_pkg/share/lidar_pkg/cmake/lidar_pkgConfig.cmake /workspace/catkin_ws/devel/share/lidar_pkg/cmake/lidar_pkgConfig.cmake
+/workspace/catkin_ws/devel/.private/lidar_pkg/share/lidar_pkg/cmake/lidar_pkgConfig-version.cmake /workspace/catkin_ws/devel/share/lidar_pkg/cmake/lidar_pkgConfig-version.cmake
+/workspace/catkin_ws/devel/.private/lidar_pkg/lib/pkgconfig/lidar_pkg.pc /workspace/catkin_ws/devel/lib/pkgconfig/lidar_pkg.pc

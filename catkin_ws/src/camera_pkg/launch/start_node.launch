@@ -1,0 +1,21 @@
+<launch>
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <!-- <arg name="enable_rgbd" value="true"/>  -->
+        <arg name="enable_sync" value="true"/>
+        <arg name="enable_color" value="true"/>
+        <arg name="enable_depth" value="true"/>
+        <arg name="align_depth" value="true"/>
+    </include>
+
+    <include file="$(find ouster_ros)/launch/driver.launch">
+        <arg name="sensor_hostname" value="10.42.0.185"/>
+        <arg name="viz" value="false"/>
+    </include>
+
+    <node
+        pkg="camera_pkg"
+        type="camera_node.py"
+        name="camera_node"
+        output="screen"
+    />
+</launch>
