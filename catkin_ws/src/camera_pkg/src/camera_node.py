@@ -1,5 +1,22 @@
 #!/usr/bin/env python3.8
 
+#===============================================================================================
+                                                       
+# ,-----.  ,---.  ,--.   ,--.,------.,------.   ,---.   
+#'  .--./ /  O  \ |   `.'   ||  .---'|  .--. ' /  O  \  
+#|  |    |  .-.  ||  |'.'|  ||  `--, |  '--'.'|  .-.  | 
+#'  '--'\|  | |  ||  |   |  ||  `---.|  |\  \ |  | |  | 
+# `-----'`--' `--'`--'   `--'`------'`--' '--'`--' `--' 
+
+#The camera node is based on Ultralytic's YoloV8 and takes in raw camera data, passes it through
+#The model, projects it to 3d space, then publishes it to the camera's detections channel
+# Moose Abou-Harb and Jake Sleppy - 04/05/26
+                                                       
+#===============================================================================================
+
+#Import typing for strong typing
+from typing import *
+
 #Import all the ROS things
 import rospy
 import message_filters
@@ -17,29 +34,42 @@ import os
 CAMERA_INFO_TOPIC = "/camera/color/camera_info"
 CAMERA_IMAGE_TOPIC = "/camera/color/image_raw"
 CAMERA_DEPTH_TOPIC = "/camera/aligned_depth_to_color/image_raw"
+CAMERA_DETECTIONS_TOPIC = "detections"
 
 #Instantiate the CVBridge to convert the ROS Images to easily manipulated CV2 images
 bridge = CvBridge()
 
-#The transform matrix that converts camera coords to woorld coords, see `project_to_ws` for detals
-coord_conv_mat = np.array([
-    [0, 0, 1],
-    [-1, 0, 0],
-    [0, -1, 0]
-])
-
-#Keep globals that the callback will populate
-#TODO depth is given in millimeters, see if this messes up WS projection
-last_image_rgb = None
-last_image_depth = None
-
 class Point3d:
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
+    """
+    A simple wrapper around a vec<3> equivalent
+
+    Attributes:
+        x: float - the X component
+        y: float - the Y component
+        z: float - the Z component
+    """
+    def __init__(self, x: float = 0, y: float = 0, z: float = 0):
+        self.x: float = x
+        self.y: float = y
+        self.z: float = z
 
 class Point2d:
+    """
+    A simple wrapper around a vec<2> equivalent with a method to project into
+    3D space
+
+    Attributes:
+        x: float - the X component
+        y: float - the Y component
+    """
+
+    #The transform matrix that converts camera coords to woorld coords, see `project` for detals
+    coord_conv_mat = np.array([
+        [0, 0, 1],
+        [-1, 0, 0],
+        [0, -1, 0]
+    ])
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -53,139 +83,182 @@ class Point2d:
             [-1, 0, 0],
             [0, -1, 0]
 
-        :param: camera_point is a 2d tuple with [0] being x, and [1] being y
-        :param: depth is the depth value at camera_point
-        :param: camera_intrinsics is a 4d tuple, with (focal_x, focal_y, principal_x, principal_y)
-        :returns: a 3d numpy array containing the point in worldspace
         """
         fx, fy, cx, cy = camera_intrinsics
         x_ws = ((self.x - cx) * depth) / fx
         y_ws = ((self.y - cy) * depth) / fy
-        ws_point = coord_conv_mat.dot(np.array([x_ws, y_ws, depth]))
+        ws_point = Point2d.coord_conv_mat.dot(np.array([x_ws, y_ws, depth]))
         return Point3d(ws_point[0], ws_point[1], ws_point[2])
 
-def fetch_camera_info() -> CameraInfo:
+class YoloV8CameraNode():
     """
-    Blocking wait to receive camera intrinsic info
+    The camera node that takes in raw camera data and runs it through YoloV8 to produce final detections
 
-    :returns: a CameraInfo message with the cameras intrinsics
-    :rtype: CameraInfo
+    Attributes:
+        last_image_rgb: Optional[np.ndarray] - the most recent raw RGB data from the camera
+        last_image_depth: Optional[np.ndarray] - the most recent depth value from the camera in meters
+        camera_intrinsics: Tuple[float, 4] - A tuple defined as (focal_x, focal_y, principle_x, principle_y)
     """
-    try:
-        cam_info = rospy.wait_for_message(CAMERA_INFO_TOPIC, CameraInfo, timeout=None)
-        return cam_info
-    except rospy.ROSInterruptException:
-        rospy.logwarn("ROS Shutdown occured before camera node could fetch camera metadata!")
+    def __init__(self,
+        camera_info_topic: str, 
+        camera_rgb_topic: str, 
+        camera_depth_topic: str, 
+        detection_publish_topic: str
+    ) -> None:
+        """
+        Constructor for the camera node
 
-def camera_callback(rgb_data: Image, depth_data: Image) -> None:
-    """
-    Callback to receive the most recent message of the RGB from camera
-    """
-    global last_image_rgb, last_image_depth
-    last_image_rgb = rgb_data
-    last_image_depth = depth_data
+        Args:
+            camera_info_topic: str - the topic to get the camera intrinsics, K
+            camera_rgb_topic: str - the topic to get the camera's rgb data
+            camera_depth_topic: str - the topic to get the camera's depth / Z data
+            detection_publish_topic - the topic to publish the detections we create to
+        """
+        #Save our topics
+        self.camera_info_topic = camera_info_topic
+        self.camera_rgb_topic = camera_rgb_topic
+        self.camera_depth_topic = camera_depth_topic
+        self.detection_publich_topic = self.detection_publich_topic
 
+        #Create refs to store the most recently received data
+        self.last_image_rgb: Optional[np.ndarray] = None
+        self.last_image_depth: Optional[np.ndarray] = None
 
-def main():
-    #Ref our last image
-    global last_image_depth, last_image_rgb
+        #Try to silence Yolo, might not work, TODO figure out how to do this right
+        os.environ['YOLO_VERBOSE'] = 'False'
 
-    #Make yolo shut up
-    os.environ['YOLO_VERBOSE'] = 'False' 
+        #Create the custom publisher for the object detection messages
+        obj_pub = rospy.Publisher("detections", ObjectDetection, queue_size=10)
 
-    #Create the custom publisher for the object detection messages
-    obj_pub = rospy.Publisher("detections", ObjectDetection, queue_size=10)
+        #Declare our node
+        rospy.init_node("camera_node", anonymous=False)
 
-    #Declare our node
-    rospy.init_node("camera_inference_node", anonymous=False)
+        #Wait on the camera node to be up and running, fetch its camera data
+        cam_meta = self.__camera_info_blocking_callback()
+        focal_x = cam_meta.P[0]
+        focal_y = cam_meta.P[5]
+        principle_x = cam_meta.P[2]
+        principle_y = cam_meta.P[6]
+        loginfo = f"Camera has focal lengths: {focal_x}, {focal_y}, with principle points: {principle_x}, {principle_y}"
+        self.camera_intrinsics = (focal_x, focal_y, principle_x, principle_y)
+        rospy.loginfo(loginfo)
 
-    #Wait on the camera node to be up and running, fetch its camera data
-    cam_meta = fetch_camera_info()
-    focal_x = cam_meta.P[0]
-    focal_y = cam_meta.P[5]
-    principle_x = cam_meta.P[2]
-    principle_y = cam_meta.P[6]
-    loginfo = f"Camera has focal lengths: {focal_x}, {focal_y}, with principle points: {principle_x}, {principle_y}"
-    camera_intrinsics = (focal_x, focal_y, principle_x, principle_y)
-    rospy.loginfo(loginfo)
+        #Create a subscriber to bind to the camera topics
+        rgb_sub = message_filters.Subscriber(self.camera_rgb_topic, Image)
+        depth_sub = message_filters.Subscriber(self.camera_depth_topic, Image)
+        message_filters.ApproximateTimeSynchronizer(
+            [rgb_sub, depth_sub], 
+            queue_size=10,
+            slop=0.05
+        ).registerCallback(self.__camera_callback)
 
-    #Create a subscriber to bind to the camera topics
-    rgb_sub = message_filters.Subscriber(CAMERA_IMAGE_TOPIC, Image)
-    depth_sub = message_filters.Subscriber(CAMERA_DEPTH_TOPIC, Image)
-    message_filters.ApproximateTimeSynchronizer(
-        [rgb_sub, depth_sub], 
-        queue_size=10,
-        slop=0.05
-    ).registerCallback(camera_callback)
+        #Create our YOLO instance
+        self.model = YOLO("/workspace/yolov8s.pt")
+        rospy.loginfo("YOLO Model loaded and ready!")
 
-    #Load up YOLO
-    model = YOLO("/workspace/yolov8s.pt")
-    rospy.loginfo("YOLO Model loaded and ready!")
+        #Enter our infinite processing loop
+        self.process()
 
-    #Loop and process
-    while not rospy.is_shutdown():
+    def process(self) -> None:
+        """
+        An infinite loop that fetches the most recently received images and produces 
+        the resulting detections from YOLO
 
-        if ((last_image_rgb != None) and (last_image_depth != None)):
+        Args:
+            None
 
-            #Get CV2 forms of the images for easy manipulation, note that the depth image is interpolated
-            #and resized so that depth values overlay, with the depth given in MM conver to M
-            cv_rgb_image = bridge.imgmsg_to_cv2(last_image_rgb)
-            cv_depth_raw = bridge.imgmsg_to_cv2(last_image_depth, desired_encoding="passthrough")
-            cv_depth_image = cv_depth_raw.astype(np.float32) / 1000.0
+        Returns:
+            None
+        """
+        while not rospy.is_shutdown():
 
-            # rgb_height, rgb_width = cv_rgb_image.shape[:2]
-            # depth_height, depth_width = cv_depth_image.shape[:2] 
-            # rospy.loginfo(f"RGB: ({rgb_height}, {rgb_width}), Depth: ({depth_height}, {depth_width})")
+            #Ensure we have SOMETHING
+            if ((self.last_image_rgb != None) and (self.last_image_depth != None)):
 
-            #Reset so we can repopulate
-            last_image_rgb = None
-            last_image_depth = None
+                #Capture a copy of the new frames, and reset class instances
+                new_image: np.ndarray = self.last_image_rgb
+                new_depth: np.ndarray = self.last_image_depth
+                self.last_image_depth = None
+                self.last_image_rgb = None
 
-            #Run inference
-            results = model.predict(cv_rgb_image, verbose=False)
+                #Run inference
+                results = self.model.predict(new_image, verbose=False)
 
-            #Loop over results
-            for result in results:
-                class_names = result.names
-                for box in result.boxes:
-                    #Get classification and confidence
-                    class_id_tensor = box.cls
-                    class_id = int(class_id_tensor.item())
-                    class_name = class_names[class_id]
-                    class_conf = box.conf.item()
+                #Loop over results
+                for result in results:
+                    class_names = result.names
+                    for box in result.boxes:
 
-                    #Get the base info on the boxes dimensions and depth
-                    corner_coords = box.xyxy.cpu().numpy()[0]
-                    xmin, ymin, xmax, ymax = map(int, corner_coords)
-                    xmax_clamp = min(xmax, cv_depth_image.shape[1] - 1)
-                    ymax_clamp = min(ymax, cv_depth_image.shape[0] - 1) 
+                        #Get classification and confidence
+                        class_id_tensor = box.cls
+                        class_id = int(class_id_tensor.item())
+                        class_name = class_names[class_id]
+                        class_conf = box.conf.item()
 
-                    #Create corners and center points, then project it into worldspace
-                    bottom_corner_ws: Point3d = Point2d(xmin, ymin).project(cv_depth_image[ymin][xmin], camera_intrinsics)
-                    top_corner_ws: Point3d = Point2d(xmax, ymax).project(cv_depth_image[ymax_clamp][xmax_clamp], camera_intrinsics)
-                    center_point_ss = Point2d(xmin + ((xmax - xmin) / 2), ymin + ((ymax - ymin) / 2))
-                    center_point_ws = center_point_ss.project(cv_depth_image[int(center_point_ss.y)][int(center_point_ss.x)], camera_intrinsics)
+                        #Get the base info on the boxes dimensions and depth
+                        corner_coords = box.xyxy.cpu().numpy()[0]
+                        xmin, ymin, xmax, ymax = map(int, corner_coords)
+                        xmax_clamp = min(xmax, new_depth.shape[1] - 1)
+                        ymax_clamp = min(ymax, new_depth.shape[0] - 1) 
 
-                    #Calculate the 3d boxes dimensions, folding depth to create a 3d rectangular prism
-                    #At this point, z is up down, y is left and right, and x is depth, this is standard ROS coords
-                    near_plane_x = min(bottom_corner_ws.x, top_corner_ws.x, center_point_ws.x)
-                    width = abs(top_corner_ws.y - bottom_corner_ws.y)
-                    height = abs(top_corner_ws.z - bottom_corner_ws.z)
-                    depth = width
+                        #Create corners and center points, then project it into worldspace
+                        bottom_corner_ws: Point3d = Point2d(xmin, ymin).project(new_depth[ymin][xmin], self.camera_intrinsics)
+                        top_corner_ws: Point3d = Point2d(xmax, ymax).project(new_depth[ymax_clamp][xmax_clamp], self.camera_intrinsics)
+                        center_point_ss = Point2d(xmin + ((xmax - xmin) / 2), ymin + ((ymax - ymin) / 2))
+                        center_point_ws = center_point_ss.project(new_depth[int(center_point_ss.y)][int(center_point_ss.x)], self.camera_intrinsics)
 
-                    #Calculate the center point of the box, by increasing its depth to half the rectangular prism
-                    center_point_ws.x = near_plane_x + 0.5 * depth
+                        #Calculate the 3d boxes dimensions, folding depth to create a 3d rectangular prism
+                        #At this point, z is up down, y is left and right, and x is depth, this is standard ROS coords
+                        near_plane_x = min(bottom_corner_ws.x, top_corner_ws.x, center_point_ws.x)
+                        width = abs(top_corner_ws.y - bottom_corner_ws.y)
+                        height = abs(top_corner_ws.z - bottom_corner_ws.z)
+                        depth = width
 
-                    #Publish the detection
-                    det_msg = f"Detected Object\n \tClass: {class_name}\n\tConf: {class_conf}\n\tCenter: ({center_point_ws.x},{center_point_ws.y},{center_point_ws.z})\n\tSize: ({depth},{height},{width})\n"
-                    rospy.loginfo(det_msg)
-        else:
-            #Sleep so that hopefully callbacks can run
-            rospy.sleep(0.1)
+                        #Calculate the center point of the box, by increasing its depth to half the rectangular prism
+                        center_point_ws.x = near_plane_x + 0.5 * depth
 
+                        #Publish the detection
+                        det_msg = f"Detected Object\n \tClass: {class_name}\n\tConf: {class_conf}\n\tCenter: ({center_point_ws.x},{center_point_ws.y},{center_point_ws.z})\n\tSize: ({depth},{height},{width})\n"
+                        rospy.loginfo(det_msg)
+            else:
+                #Sleep so that hopefully callbacks can run
+                rospy.sleep(0.1)
 
+    def __camera_info_blocking_callback(self) -> CameraInfo:
+        """
+        Blocking wait to receive camera intrinsic info, K, private class member
 
-    rospy.spin()
+        Args:
+            None
+
+        Returns:
+            CameraInfo - the camera info ROS sensor message, used to get the K matrix
+        """
+        try:
+            cam_info = rospy.wait_for_message(self.camera_info_topic, CameraInfo, timeout=None)
+            return cam_info
+        except rospy.ROSInterruptException:
+            rospy.logwarn("ROS Shutdown occured before camera node could fetch camera metadata!")
+
+    def __camera_callback(self, rgb_data: Image, depth_data: Image) -> None:
+        """
+        Callback to receive the most recent message of the RGB and depth from camera
+
+        Args:
+            rgb_data: Image - the raw rgb image populated by the callback
+            depth_data: Image - the raw depth values (uint16_t millimeters) populated by the callback
+        
+        Returns:
+            None
+        """
+
+        #Get CV2 forms of the images for easy manipulation, note that the depth image is interpolated
+        #and resized so that depth values overlay, with the depth given in MM conver to M
+        self.last_image_rgb = bridge.imgmsg_to_cv2(rgb_data)
+        self.last_image_depth = bridge.imgmsg_to_cv2(depth_data, desired_encoding="passthrough").astype(np.float32) / 1000.0
+
 
 if __name__ == "__main__":
-    main()
+    #Create our node and when it quits, spin
+    YoloV8CameraNode(CAMERA_INFO_TOPIC, CAMERA_IMAGE_TOPIC, CAMERA_DEPTH_TOPIC, CAMERA_DETECTIONS_TOPIC)
+    rospy.spin()

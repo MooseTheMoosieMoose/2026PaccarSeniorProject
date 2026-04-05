@@ -207,83 +207,28 @@ RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && catkin_make --cmake-args 
 WORKDIR /
 
 #--------------------------
-#Now we need to resolve the necessary dependancies for VirConv, which are listed, and hopefully
-#mostly contained in the base image here: https://github.com/hailanyi/VirConv
+#Now we need to resolve the necessary dependancies for PointPillars
 #--------------------------
 RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install \
+    python3 -m pip install --ignore-installed \
         numba \
-        pccm
-
-#Build CuMM so we can eventually build SPConv
-ENV CUMM_CUDA_VERSION="11.4"
-ENV CUMM_DISABLE_JIT="1"
-ENV CUMM_CUDA_ARCH_LIST="8.7"
-RUN mkdir -p /opt/cumm_lib
-WORKDIR /opt/cumm_lib
-RUN git clone --branch v0.4.5 https://github.com/FindDefinition/cumm.git
-RUN cd /opt/cumm_lib/cumm && python3 setup.py bdist_wheel && pip install dist/*.whl
-WORKDIR /
-
-#Now we can build SPConv, this takes for freaking EVER
-ENV MAX_JOBS=1
-ENV CMAKE_BUILD_PARALLEL_LEVEL=1
-ENV SPCONV_DISABLE_JIT="1"
-RUN mkdir -p /opt/spconv_lib
-WORKDIR /opt/spconv_lib
-RUN git clone --branch v2.3.5 https://github.com/traveller59/spconv.git
-RUN cd /opt/spconv_lib/spconv && python3 setup.py bdist_wheel && pip install dist/*.whl
-WORKDIR /
+        pyyaml \
+        open3d
 
 #--------------------------
-#Now we have all the deps for VirConv but now we need all the deps for the full Lidar node
+#Bully the system into understanding that we are on a Jetson
 #--------------------------
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install \
-        scikit-image thop rosnumpy
-
-#and get pcdet
 ENV TORCH_CUDA_ARCH_LIST="8.7"
-RUN mkdir -p /opt/pcdet_lib
-WORKDIR /opt/pcdet_lib
-RUN git clone https://github.com/open-mmlab/OpenPCDet.git
-WORKDIR /opt/pcdet_lib/OpenPCDet
-RUN pip install -e .
-WORKDIR /
 
 #--------------------------
-#In order to use VirConv in our project, we have to perform a very annoying set of
-#tasks:
-#   1. it has to be cloned
-#   2. the lines "#include <THC/THC.h>" and
-#                "extern THCState *state;" must be removed
-#   3. then wheel and install
+#Now we can build and install PointPillars
 #--------------------------
-RUN mkdir -p /opt/virconv
-WORKDIR /opt/virconv
-RUN git clone https://github.com/hailanyi/VirConv.git
-
-#Now that its pulled we have to search and remove our targets
-RUN find /opt/virconv -type f -exec grep -l '#include <THC/THC.h>' {} \; -exec sed -i '/#include <THC\/THC.h>/d' {} \; \
-    && find /opt/virconv -type f -exec grep -l 'extern THCState \*state;' {} \; -exec sed -i '/extern THCState \*state;/d' {} \;
-
-#For some reason setup.py does not like the fact that we built spconv from source, so we have to remove it from
-#Virconv's dependencies list. Unfortunatly, this means employing black magic I dont understand; dont ask me how it works
-#just know that it removes the `setup.py` dependency from the build portion of VirConv
-RUN sed -i '/spconv/d' /opt/virconv/VirConv/setup.py
-
-#And now we can finally try and build a working version of virconv from source :)
-ENV CUDA_HOME="/usr/local/cuda"
-WORKDIR /opt/virconv/VirConv
-RUN pip install -e .
+RUN mkdir -p /opt/pointpillars
+WORKDIR /opt/pointpillars
+RUN git clone https://github.com/zhulf0804/PointPillars.git
+WORKDIR /opt/pointpillars/PointPillars
+RUN pip install .
 WORKDIR /
-
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install \
-        prefetch-generator \
-        tensorboardX \
-        easydict \
-        pyyaml
 
 #===============================================================================================
                                                
