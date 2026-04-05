@@ -1,1 +1,10 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/share/gennodejs/ros/coop_per_msgs/msg/_index.js
+
+"use strict";
+
+let ObjectDetectionFrame = require('./ObjectDetectionFrame.js');
+let ObjectDetection = require('./ObjectDetection.js');
+
+module.exports = {
+  ObjectDetectionFrame: ObjectDetectionFrame,
+  ObjectDetection: ObjectDetection,
+};

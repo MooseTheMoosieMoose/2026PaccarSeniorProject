@@ -1,1 +1,12 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/coop_per_msgs-msg.asd
+
+(cl:in-package :asdf)
+
+(defsystem "coop_per_msgs-msg"
+  :depends-on (:roslisp-msg-protocol :roslisp-utils :std_msgs-msg
+)
+  :components ((:file "_package")
+    (:file "ObjectDetection" :depends-on ("_package_ObjectDetection"))
+    (:file "_package_ObjectDetection" :depends-on ("_package"))
+    (:file "ObjectDetectionFrame" :depends-on ("_package_ObjectDetectionFrame"))
+    (:file "_package_ObjectDetectionFrame" :depends-on ("_package"))
+  ))

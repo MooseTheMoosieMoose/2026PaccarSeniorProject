@@ -1,0 +1,12 @@
+<launch>
+
+    <include file="$(find lidar_pkg)/launch/start_node.launch" />
+    <include file="$(find camera_pkg)/launch/start_node.launch" />
+
+    <node
+        pkg="self_fusion_pkg"
+        type="self_fusion_node.py"
+        name="self_fusion_node"
+        output="screen"
+    />
+</launch>

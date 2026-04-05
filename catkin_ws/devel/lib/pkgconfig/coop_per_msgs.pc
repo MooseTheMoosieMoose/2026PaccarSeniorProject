@@ -1,1 +1,8 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/pkgconfig/coop_per_msgs.pc
+prefix=/workspace/catkin_ws/devel
+
+Name: coop_per_msgs
+Description: Description of coop_per_msgs
+Version: 0.0.0
+Cflags: -I/workspace/catkin_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: 

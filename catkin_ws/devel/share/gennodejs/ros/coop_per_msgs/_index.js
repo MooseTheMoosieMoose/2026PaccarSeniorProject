@@ -1,1 +1,6 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/share/gennodejs/ros/coop_per_msgs/_index.js
+
+"use strict";
+
+module.exports = {
+  msg: require('./msg/_index.js'),
+};

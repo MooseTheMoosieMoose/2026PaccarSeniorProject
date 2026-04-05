@@ -1,1 +1,8 @@
-/workspace/catkin_ws/devel/.private/lidar_pkg/lib/pkgconfig/lidar_pkg.pc
+prefix=/workspace/catkin_ws/devel
+
+Name: lidar_pkg
+Description: Description of lidar_pkg
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

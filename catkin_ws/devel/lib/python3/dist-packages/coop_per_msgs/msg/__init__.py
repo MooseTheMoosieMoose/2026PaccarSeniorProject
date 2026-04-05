@@ -1,1 +1,2 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/python3/dist-packages/coop_per_msgs/msg/__init__.py
+from ._ObjectDetection import *
+from ._ObjectDetectionFrame import *

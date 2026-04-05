@@ -1,1 +1,9 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/_package.lisp
+(cl:defpackage coop_per_msgs-msg
+  (:use )
+  (:export
+   "<OBJECTDETECTION>"
+   "OBJECTDETECTION"
+   "<OBJECTDETECTIONFRAME>"
+   "OBJECTDETECTIONFRAME"
+  ))
+

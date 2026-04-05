@@ -68,7 +68,7 @@ set(coop_per_msgs_CONFIG_INCLUDED TRUE)
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
   set(coop_per_msgs_SOURCE_PREFIX /workspace/catkin_ws/src/coop_per_msgs)
-  set(coop_per_msgs_DEVEL_PREFIX /workspace/catkin_ws/devel/.private/coop_per_msgs)
+  set(coop_per_msgs_DEVEL_PREFIX /workspace/catkin_ws/devel)
   set(coop_per_msgs_INSTALL_PREFIX "")
   set(coop_per_msgs_PREFIX ${coop_per_msgs_DEVEL_PREFIX})
 else()
@@ -156,7 +156,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /workspace/catkin_ws/install/lib;/workspace/catkin_ws/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /workspace/catkin_ws/install/lib;/opt/cv_bridge_ws/devel/lib;/opt/lidar_ws/devel/lib;/opt/camera_ws/devel/lib;/opt/cv_bridge_ws/install/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

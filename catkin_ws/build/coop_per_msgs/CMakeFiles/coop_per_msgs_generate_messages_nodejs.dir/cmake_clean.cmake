@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
-  "/workspace/catkin_ws/devel/.private/coop_per_msgs/share/gennodejs/ros/coop_per_msgs/msg/ObjectDetection.js"
+  "/workspace/catkin_ws/devel/share/gennodejs/ros/coop_per_msgs/msg/ObjectDetection.js"
+  "/workspace/catkin_ws/devel/share/gennodejs/ros/coop_per_msgs/msg/ObjectDetectionFrame.js"
   "CMakeFiles/coop_per_msgs_generate_messages_nodejs"
 )
 

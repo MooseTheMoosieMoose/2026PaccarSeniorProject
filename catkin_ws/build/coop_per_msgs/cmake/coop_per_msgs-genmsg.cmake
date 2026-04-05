@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.cmake.em
 
-message(STATUS "coop_per_msgs: 1 messages, 0 services")
+message(STATUS "coop_per_msgs: 2 messages, 0 services")
 
 set(MSG_I_FLAGS "-Icoop_per_msgs:/workspace/catkin_ws/src/coop_per_msgs/msg;-Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg")
 
@@ -22,6 +22,11 @@ add_custom_target(_coop_per_msgs_generate_messages_check_deps_${_filename}
   COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "coop_per_msgs" "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg" ""
 )
 
+get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" NAME_WE)
+add_custom_target(_coop_per_msgs_generate_messages_check_deps_${_filename}
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "coop_per_msgs" "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" "coop_per_msgs/ObjectDetection:std_msgs/Header"
+)
+
 #
 #  langs = gencpp;geneus;genlisp;gennodejs;genpy
 #
@@ -32,6 +37,12 @@ _generate_msg_cpp(coop_per_msgs
   "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg"
   "${MSG_I_FLAGS}"
   ""
+  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/coop_per_msgs
+)
+_generate_msg_cpp(coop_per_msgs
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg"
+  "${MSG_I_FLAGS}"
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/coop_per_msgs
 )
 
@@ -51,6 +62,8 @@ add_dependencies(coop_per_msgs_generate_messages coop_per_msgs_generate_messages
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg" NAME_WE)
 add_dependencies(coop_per_msgs_generate_messages_cpp _coop_per_msgs_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" NAME_WE)
+add_dependencies(coop_per_msgs_generate_messages_cpp _coop_per_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(coop_per_msgs_gencpp)
@@ -65,6 +78,12 @@ _generate_msg_eus(coop_per_msgs
   "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg"
   "${MSG_I_FLAGS}"
   ""
+  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/coop_per_msgs
+)
+_generate_msg_eus(coop_per_msgs
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg"
+  "${MSG_I_FLAGS}"
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/coop_per_msgs
 )
 
@@ -84,6 +103,8 @@ add_dependencies(coop_per_msgs_generate_messages coop_per_msgs_generate_messages
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg" NAME_WE)
 add_dependencies(coop_per_msgs_generate_messages_eus _coop_per_msgs_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" NAME_WE)
+add_dependencies(coop_per_msgs_generate_messages_eus _coop_per_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(coop_per_msgs_geneus)
@@ -98,6 +119,12 @@ _generate_msg_lisp(coop_per_msgs
   "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg"
   "${MSG_I_FLAGS}"
   ""
+  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/coop_per_msgs
+)
+_generate_msg_lisp(coop_per_msgs
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg"
+  "${MSG_I_FLAGS}"
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/coop_per_msgs
 )
 
@@ -117,6 +144,8 @@ add_dependencies(coop_per_msgs_generate_messages coop_per_msgs_generate_messages
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg" NAME_WE)
 add_dependencies(coop_per_msgs_generate_messages_lisp _coop_per_msgs_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" NAME_WE)
+add_dependencies(coop_per_msgs_generate_messages_lisp _coop_per_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(coop_per_msgs_genlisp)
@@ -131,6 +160,12 @@ _generate_msg_nodejs(coop_per_msgs
   "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg"
   "${MSG_I_FLAGS}"
   ""
+  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/coop_per_msgs
+)
+_generate_msg_nodejs(coop_per_msgs
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg"
+  "${MSG_I_FLAGS}"
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/coop_per_msgs
 )
 
@@ -150,6 +185,8 @@ add_dependencies(coop_per_msgs_generate_messages coop_per_msgs_generate_messages
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg" NAME_WE)
 add_dependencies(coop_per_msgs_generate_messages_nodejs _coop_per_msgs_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" NAME_WE)
+add_dependencies(coop_per_msgs_generate_messages_nodejs _coop_per_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(coop_per_msgs_gennodejs)
@@ -164,6 +201,12 @@ _generate_msg_py(coop_per_msgs
   "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg"
   "${MSG_I_FLAGS}"
   ""
+  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/coop_per_msgs
+)
+_generate_msg_py(coop_per_msgs
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg"
+  "${MSG_I_FLAGS}"
+  "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/coop_per_msgs
 )
 
@@ -182,6 +225,8 @@ add_dependencies(coop_per_msgs_generate_messages coop_per_msgs_generate_messages
 
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg" NAME_WE)
+add_dependencies(coop_per_msgs_generate_messages_py _coop_per_msgs_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg" NAME_WE)
 add_dependencies(coop_per_msgs_generate_messages_py _coop_per_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility

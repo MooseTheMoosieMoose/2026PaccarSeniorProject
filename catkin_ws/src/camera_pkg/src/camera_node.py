@@ -17,11 +17,14 @@
 #Import typing for strong typing
 from typing import *
 
+#as a metric we use Unix epoch time since its a universal reference
+import time
+
 #Import all the ROS things
 import rospy
 import message_filters
 from sensor_msgs.msg import CameraInfo, Image
-from coop_per_msgs.msg import ObjectDetection
+from coop_per_msgs.msg import ObjectDetection, ObjectDetectionFrame
 
 #Import all the extra packages for image manipulation and inference
 import numpy as np
@@ -34,7 +37,7 @@ import os
 CAMERA_INFO_TOPIC = "/camera/color/camera_info"
 CAMERA_IMAGE_TOPIC = "/camera/color/image_raw"
 CAMERA_DEPTH_TOPIC = "/camera/aligned_depth_to_color/image_raw"
-CAMERA_DETECTIONS_TOPIC = "detections"
+CAMERA_DETECTIONS_TOPIC = "camera_node/detections"
 
 #Instantiate the CVBridge to convert the ROS Images to easily manipulated CV2 images
 bridge = CvBridge()
@@ -98,6 +101,7 @@ class YoloV8CameraNode():
         last_image_rgb: Optional[np.ndarray] - the most recent raw RGB data from the camera
         last_image_depth: Optional[np.ndarray] - the most recent depth value from the camera in meters
         camera_intrinsics: Tuple[float, 4] - A tuple defined as (focal_x, focal_y, principle_x, principle_y)
+        obj_pub - the publisher for detections
     """
     def __init__(self,
         camera_info_topic: str, 
@@ -118,7 +122,7 @@ class YoloV8CameraNode():
         self.camera_info_topic = camera_info_topic
         self.camera_rgb_topic = camera_rgb_topic
         self.camera_depth_topic = camera_depth_topic
-        self.detection_publich_topic = self.detection_publich_topic
+        self.detection_publich_topic = detection_publish_topic
 
         #Create refs to store the most recently received data
         self.last_image_rgb: Optional[np.ndarray] = None
@@ -126,9 +130,6 @@ class YoloV8CameraNode():
 
         #Try to silence Yolo, might not work, TODO figure out how to do this right
         os.environ['YOLO_VERBOSE'] = 'False'
-
-        #Create the custom publisher for the object detection messages
-        obj_pub = rospy.Publisher("detections", ObjectDetection, queue_size=10)
 
         #Declare our node
         rospy.init_node("camera_node", anonymous=False)
@@ -152,6 +153,9 @@ class YoloV8CameraNode():
             slop=0.05
         ).registerCallback(self.__camera_callback)
 
+        #Create the custom publisher for the object detection messages
+        self.obj_pub = rospy.Publisher(self.detection_publich_topic, ObjectDetectionFrame, queue_size=10)
+
         #Create our YOLO instance
         self.model = YOLO("/workspace/yolov8s.pt")
         rospy.loginfo("YOLO Model loaded and ready!")
@@ -170,10 +174,14 @@ class YoloV8CameraNode():
         Returns:
             None
         """
+        frame_id = 0
         while not rospy.is_shutdown():
 
             #Ensure we have SOMETHING
-            if ((self.last_image_rgb != None) and (self.last_image_depth != None)):
+            if ((isinstance(self.last_image_rgb, np.ndarray)) and (isinstance(self.last_image_depth, np.ndarray))):
+
+                #Snap the time, epoch seconds as soon as we start the process
+                process_begin_time = time.time()
 
                 #Capture a copy of the new frames, and reset class instances
                 new_image: np.ndarray = self.last_image_rgb
@@ -185,6 +193,7 @@ class YoloV8CameraNode():
                 results = self.model.predict(new_image, verbose=False)
 
                 #Loop over results
+                detections: List[ObjectDetection] = []
                 for result in results:
                     class_names = result.names
                     for box in result.boxes:
@@ -217,9 +226,35 @@ class YoloV8CameraNode():
                         #Calculate the center point of the box, by increasing its depth to half the rectangular prism
                         center_point_ws.x = near_plane_x + 0.5 * depth
 
-                        #Publish the detection
-                        det_msg = f"Detected Object\n \tClass: {class_name}\n\tConf: {class_conf}\n\tCenter: ({center_point_ws.x},{center_point_ws.y},{center_point_ws.z})\n\tSize: ({depth},{height},{width})\n"
-                        rospy.loginfo(det_msg)
+                        #Store the detection
+                        new_detection: ObjectDetection = ObjectDetection()
+
+                        new_detection.lat_y = center_point_ws.y
+                        new_detection.long_x = center_point_ws.x
+                        new_detection.altitude_z = center_point_ws.z
+
+                        new_detection.width = width
+                        new_detection.depth = depth
+                        new_detection.height = height
+
+                        new_detection.rotation = 0.0
+
+                        new_detection.class_name = class_name
+                        new_detection.confidence = class_conf 
+
+                        detections.append(new_detection)
+
+                #Now that we have populated the detections we can publish them
+                new_detection_frame: ObjectDetectionFrame = ObjectDetectionFrame()
+                new_detection_frame.header.stamp = rospy.Time.now()
+                new_detection_frame.header.frame_id = frame_id
+                new_detection_frame.epoch_timestamp = process_begin_time
+                new_detection_frame.detections = detections
+                self.obj_pub.publish(new_detection_frame)
+                frame_id += 1
+
+                count = len(detections)
+                rospy.loginfo(f"New detection frame published from camera, with {count} objects")
             else:
                 #Sleep so that hopefully callbacks can run
                 rospy.sleep(0.1)

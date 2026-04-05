@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.context.in
 
-messages_str = "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg"
+messages_str = "/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetection.msg;/workspace/catkin_ws/src/coop_per_msgs/msg/ObjectDetectionFrame.msg"
 services_str = ""
 pkg_name = "coop_per_msgs"
 dependencies_str = "std_msgs"

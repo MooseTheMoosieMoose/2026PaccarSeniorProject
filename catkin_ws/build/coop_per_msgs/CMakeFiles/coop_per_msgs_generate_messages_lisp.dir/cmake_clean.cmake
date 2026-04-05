@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
-  "/workspace/catkin_ws/devel/.private/coop_per_msgs/share/common-lisp/ros/coop_per_msgs/msg/ObjectDetection.lisp"
+  "/workspace/catkin_ws/devel/share/common-lisp/ros/coop_per_msgs/msg/ObjectDetection.lisp"
+  "/workspace/catkin_ws/devel/share/common-lisp/ros/coop_per_msgs/msg/ObjectDetectionFrame.lisp"
   "CMakeFiles/coop_per_msgs_generate_messages_lisp"
 )
 

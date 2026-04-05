@@ -1,1 +1,0 @@
-/workspace/catkin_ws/devel/.private/coop_per_msgs/lib/python3/dist-packages/coop_per_msgs/__init__.py
